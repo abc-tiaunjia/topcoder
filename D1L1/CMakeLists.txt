@@ -16,5 +16,7 @@ include_directories(
 # Add Executable
 add_executable(srm258_auto_loan srm258_AutoLoan.cpp)
 
+# Add Executable
+add_executable(srm230_sort_estimate srm230_SortEstimate.cpp)
 
 
