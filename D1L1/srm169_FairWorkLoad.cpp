@@ -5,22 +5,25 @@
 * Sources: 
 *        [1] https://community.topcoder.com/stat?c=problem_statement&pm=1901&rd=4650
 * Date Created: Sat.Oct.8.2016
+* Date Last Modified: Mon.Oct.10.2016
 *=============================================================================================*/
 
 #include <limits>
 #include <cstdio>
 #include <vector>
 #include <numeric>      // std::accumulate
+#include <algorithm>
 
 using std::vector;
 using std::accumulate;
+using std::max_element;
 
 
-class FairWorkLoad
+class FairWorkload
 {
 
 public:
-  int getMostWork(vector<int>& folders, int workers)
+  int getMostWork(vector<int> folders, int workers)
   {
     int lo = 0;
     int hi = accumulate(folders.begin(), folders.end(), 0);
@@ -28,28 +31,44 @@ public:
     size_t m = folders.size();
     int mid, sections;
     int j = 0;
+
+    vector<int> section_sums;
     while (lo < hi)
     {
+      section_sums.clear();
       j++;
       mid = (lo + hi)/2;
       sections = 0;
       int curr_folder_sum = 0;
-
-      for(int i=0; i<m; i++)
+      int i;
+      for(i=0; i<m; i++)
       {
         curr_folder_sum += folders[i];
         if (curr_folder_sum > mid)
         {
           // We've found a partition
           sections++;
+
+          // if (curr_folder_sum > mid)
+          curr_folder_sum -= folders[i];
+
+          section_sums.push_back(curr_folder_sum);
+
+          // printf("curr_folder_sum: %d, mid: %d \n", curr_folder_sum, mid);
+
           curr_folder_sum = folders[i];
         }
-
-        // if (sections > workers)
-        //   break;
-
         // printf("[%d] --> lo: %d, hi: %d, mid: %d, sections: %d \n", j, lo, hi, mid, sections);
       }
+
+      // printf("\nsections: %d \n", sections);
+      // printf("curr_folder_sum: %d, mid: %d \n", curr_folder_sum, mid);
+
+      if (sections == workers && !section_sums.empty())
+      {
+        section_sums[sections-1] += curr_folder_sum;
+      }
+      else section_sums.push_back(curr_folder_sum); // Add final section sum
       // printf("\n\n");
       if (sections < workers)
         hi = mid;
@@ -57,7 +76,20 @@ public:
         lo = mid + 1;
     } // end while
 
-    return lo;
+    printVector(section_sums);
+
+    int min_max = *max_element(section_sums.begin(), section_sums.end());
+    return min_max;
+    // return lo;
+  }
+
+  void printVector(const vector<int>& v)
+  {
+    printf("\n ----------- Section Sums ------------------\n");
+    for(size_t i=0; i<v.size(); i++)
+      printf("[%lu] \t  %d \n", i, v[i]);
+
+    printf("\n\n");
   }
 
   /*
@@ -101,9 +133,9 @@ public:
 
 int main()
 {
-  FairWorkLoad f;
+  FairWorkload f;
 
-  // Unit Test 0
+  // // Unit Test 0
   vector<int> folders = {10, 20, 30, 40, 50, 60, 70, 80, 90};
   int workers = 3;
   int m = f.getMostWork(folders, workers);
@@ -129,9 +161,16 @@ int main()
   m = f.getMostWork(folders, workers);
   printf("\033[92m m: \033[m %d \n", m); 
 
-  // Unit Test 4
+  // // Unit Test 4
   folders = {50, 50, 50, 50, 50, 50, 50 };
   workers = 2;
+  m = f.getMostWork(folders, workers);
+  printf("\033[92m m: \033[m %d \n", m); 
+
+
+  // Test Case from TopCoder
+  folders = {1, 1, 1, 1, 100};
+  workers = 5;
   m = f.getMostWork(folders, workers);
   printf("\033[92m m: \033[m %d \n", m); 
 }
