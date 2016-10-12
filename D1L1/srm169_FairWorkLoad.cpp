@@ -23,6 +23,41 @@ class FairWorkload
 {
 
 public:
+
+int getMostWork(vector<int> folders, int workers)
+  {
+    int lo = 0;
+    int hi = accumulate(folders.begin(), folders.end(), 0);
+    size_t m = folders.size();
+
+    while (lo < hi)
+    {
+      int mid = (lo + hi)/2;
+      int sections = 1;
+      int curr_folder_sum = 0;
+      int i;
+      for(i=0; i<m; i++)
+      {
+         if (curr_folder_sum + folders[i] <= mid ) {
+            // the current worker can handle it
+            curr_folder_sum += folders[i];
+         }
+         else {
+            // assign next worker
+            ++sections;
+            curr_folder_sum = folders[i];               
+         }
+      }
+
+      if (sections <= workers )
+         hi = mid;
+      else
+         lo = mid+1;
+    } // end while
+
+    return lo;
+  }
+  /*
   int getMostWork(vector<int> folders, int workers)
   {
     int lo = 0;
@@ -82,6 +117,7 @@ public:
     return min_max;
     // return lo;
   }
+  */
 
   void printVector(const vector<int>& v)
   {
